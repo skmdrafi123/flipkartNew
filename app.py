@@ -65,8 +65,8 @@ def index():
                     custComment = comtag[0].div.text
                 except Exception as e:
                     print("Exception while creating dictionary: ",e)
-
-                mydict = {"Product": searchString, "Name": name, "Rating": rating, "CommentHead": commentHead,
+                Price=0
+                mydict = {"Price":Price,"Product": searchString, "Name": name, "Rating": rating, "CommentHead": commentHead,
                           "Comment": custComment}
                 reviews.append(mydict)
             return render_template('results.html', reviews=reviews[0:(len(reviews)-1)])
