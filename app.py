@@ -65,7 +65,7 @@ def index():
                     custComment = comtag[0].div.text
                 except Exception as e:
                     print("Exception while creating dictionary: ",e)
-                Price=0
+                Price=10
                 mydict = {"Price":Price,"Product": searchString, "Name": name, "Rating": rating, "CommentHead": commentHead,
                           "Comment": custComment}
                 reviews.append(mydict)
