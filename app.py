@@ -3,7 +3,9 @@ from flask_cors import CORS,cross_origin
 import requests
 from bs4 import BeautifulSoup as bs
 from urllib.request import urlopen as uReq
-
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 app = Flask(__name__)
 
 @app.route('/',methods=['GET'])  # route to display the home page
@@ -11,11 +13,29 @@ app = Flask(__name__)
 def homePage():
     return render_template("index.html")
 
+@app.route('/youtube',methods=['GET'])  # route to display the home page
+@cross_origin()
+def youtube():
+    if request.method == 'GET':
+        driver = webdriver.Chrome(ChromeDriverManager().install())
+        driver.get("https://www.youtube.com/user/krishnaik06/videos")
+        user_data = driver.page_source.encode('utf-8').strip()
+        soup = BeautifulSoup(user_data, "lxml")
+        titles = soup.findAll('a', id='video-title')
+        print(len(list(titles)))
+        print('--------------------------------')
+        print(titles)
+        print('--------------------------------')
+
+        return render_template('youtube.html', reviews=titles)
+
 @app.route('/review',methods=['POST','GET']) # route to show the review comments in a web UI
 @cross_origin()
 def index():
     if request.method == 'POST':
         try:
+
+
             searchString = request.form['content'].replace(" ","")
             flipkart_url = "https://www.flipkart.com/search?q=" + searchString
             uClient = uReq(flipkart_url)
@@ -31,7 +51,7 @@ def index():
             prod_html = bs(prodRes.text, "html.parser")
             print(prod_html)
             commentboxes = prod_html.find_all('div', {'class': "_16PBlm"})
-
+            Price = 10
             filename = searchString + ".csv"
             fw = open(filename, "w")
             headers = "Product, Customer Name, Rating, Heading, Comment \n"
@@ -41,7 +61,7 @@ def index():
                 try:
                     #name.encode(encoding='utf-8')
                     name = commentbox.div.div.find_all('p', {'class': '_2sc7ZR _2V5EHH'})[0].text
-
+                    Price=commentbox.div.div.find_all('p', {'class': '_30jeq3 _1_WHN1'})[0].text
                 except:
                     name = 'No Name'
 
@@ -65,7 +85,7 @@ def index():
                     custComment = comtag[0].div.text
                 except Exception as e:
                     print("Exception while creating dictionary: ",e)
-                Price=10
+
                 mydict = {"Price":Price,"Product": searchString, "Name": name, "Rating": rating, "CommentHead": commentHead,
                           "Comment": custComment}
                 reviews.append(mydict)
@@ -80,4 +100,4 @@ def index():
 
 if __name__ == "__main__":
     #app.run(host='127.0.0.1', port=8001, debug=True)
-	app.run(debug=True)
+	app.run(debug=True,port=5555)
